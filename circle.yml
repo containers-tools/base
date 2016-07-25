@@ -1,0 +1,19 @@
+general:
+  artifacts:
+    - "target"
+
+machine:
+  python:
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install python3-dev
+  post:
+    - docker version
+    - docker info
+
+test:
+  override:
+    - docker run -v `pwd`:/test -tiw /test rwngwn/cct-unit-test tox
