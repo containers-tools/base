@@ -55,7 +55,10 @@ class File(Module):
         Args:
             source: path to file to be removed
         """
-        shutil.rmtree(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.unlink(path)
 
     def chown(self, owner, group, path, recursive=False):
         """
