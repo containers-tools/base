@@ -75,5 +75,46 @@ class TestFileModule(unittest.TestCase):
         self._test_chmod("0666")
         self._test_chmod("0777")
 
+    @mock.patch('base.file.os.chown')
+    def test_chown(self, mock_patch):
+        """
+        We can't run an actual chown, but we can test the other logic in
+        the routine.
+        """
+
+        # we can be fairly sure these exists on test systems and == 0
+        owner = group = "root"
+
+        path = "somepath"
+        self.ffile.chown(owner, group, path, False)
+        mock_patch.assert_called_with(path, 0, 0)
+
+    @mock.patch('base.file.os.chown')
+    def test_chown_not_recursive(self, mock_patch):
+        """
+        Ensure default chown behaviour is not recursive.
+        """
+        path = os.path.join(self.tempdir, "test_chown_recursive")
+        sub = os.path.join(path, "subdir")
+        os.makedirs(sub)
+
+        owner = group = "root"
+        self.ffile.chown(owner, group, path)
+        self.assertEquals(mock_patch.call_count, 1)
+
+    @mock.patch('base.file.os.chown')
+    def test_chown_recursive(self, mock_patch):
+        """
+        Ensure chown recursion works.
+        """
+        path = os.path.join(self.tempdir, "test_chown_recursive")
+        sub = os.path.join(path, "subdir")
+        os.makedirs(sub)
+
+        owner = group = "root"
+        self.ffile.chown(owner, group, path, True)
+        self.assertEquals(mock_patch.call_count, 2)
+
+
 if __name__ == '__main__':
     unittest.main()
